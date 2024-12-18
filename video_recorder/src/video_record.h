@@ -28,7 +28,11 @@ class VideoRecord : public Poco::Runnable, public EncoderCallback {
     int32_t initFfmpeg(RecordConf *pConf);
     void stop() { _running = false; }
 
+    //Poco::Runnable
+    //Do whatever the thread needs to do.
     void run();
+
+    //EncoderCallback
     void onVideoData(AVPacket *pkt) override;
 
   private:
@@ -43,6 +47,6 @@ class VideoRecord : public Poco::Runnable, public EncoderCallback {
     AVOutputFormat *_out_fmt = nullptr;
     AVStream *_video_stream = nullptr;
 
-    int64_t _last_pts_time = 0;
     int64_t _first_pts_time = 0;
+    int64_t _last_pts_time = 0;
 };

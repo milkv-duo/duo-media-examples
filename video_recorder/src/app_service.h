@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iostream>
-
-#include "video_record.h"
-
 #include "Poco/Exception.h"
+#include "Poco/ThreadPool.h"
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/ServerApplication.h"
+
+#include "video_record.h"
 
 class AppService : public Poco::Util::ServerApplication {
   protected:

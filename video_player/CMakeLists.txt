@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # 定义项目名称
-set(projectname videoRecording)
+set(projectname videoPlayer)
 project(${projectname} VERSION 1.0 LANGUAGES CXX)
 
 
@@ -61,7 +61,7 @@ target_link_libraries(${projectname} PUBLIC PocoNet PocoFoundation PocoUtil Poco
 
 #添加ffmpeg第三方库
 target_link_directories(${projectname} PUBLIC "${3RD_PARTY}/lib/ffmpeg")
-target_link_libraries(${projectname} PUBLIC avformat avcodec swresample avutil)
+target_link_libraries(${projectname} PUBLIC avformat avcodec swscale swresample avutil)
 
 target_link_libraries(${projectname} PUBLIC z)
 

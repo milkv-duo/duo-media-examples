@@ -112,7 +112,7 @@ void VideoRecord::run() {
     _video_stream->duration =
         av_rescale_q(_last_pts_time - _first_pts_time, AV_TIME_BASE_Q,
                      _video_stream->time_base);
-    _fmt_ctx->duration = (_last_pts_time - _first_pts_time)/1000;
+    _fmt_ctx->duration = (_last_pts_time - _first_pts_time) / 1000;
     av_write_trailer(_fmt_ctx);
 }
 

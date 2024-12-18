@@ -25,8 +25,9 @@ void AppService::defineOptions(Poco::Util::OptionSet &options) {
                 this, &AppService::handleHelp)));
 
     options.addOption(
-        Poco::Util::Option("format", "f", "Specify output format: flv mp4.")
-            .required(false)
+        Poco::Util::Option("format", "f",
+                           "Specify output format: flv and so on.")
+            .required(true)
             .repeatable(false)
             .argument("<format>")
             .callback(Poco::Util::OptionCallback<AppService>(
@@ -34,14 +35,14 @@ void AppService::defineOptions(Poco::Util::OptionSet &options) {
 
     options.addOption(
         Poco::Util::Option("time", "t", "Specify recording duration seconds.")
-            .required(false)
+            .required(true)
             .repeatable(false)
             .argument("<seconds>")
             .callback(Poco::Util::OptionCallback<AppService>(
                 this, &AppService::handleTime)));
 
     options.addOption(Poco::Util::Option("outpath", "o", "Specify output path.")
-                          .required(false)
+                          .required(true)
                           .repeatable(false)
                           .argument("<outpath>")
                           .callback(Poco::Util::OptionCallback<AppService>(
@@ -74,9 +75,12 @@ void AppService::handleOutFile(const std::string &name,
 
 void AppService::displayHelp() {
     Poco::Util::HelpFormatter helpFormatter(options());
-    helpFormatter.setCommand("AppService");
-    helpFormatter.setHeader("Application Service");
-    helpFormatter.setUsage("[-h] [-fflv] [-t60] [-oout.flv]");
+    helpFormatter.setCommand(commandName());
+    helpFormatter.setUsage("[-h] [-f flv] [-t 60] [-o out.flv]");
+    helpFormatter.setHeader(
+        "This is a simple video recording program based on milkV duo.");
+    helpFormatter.setFooter(
+        "For more information, visit the website https://milkv.io.");
     helpFormatter.format(std::cout);
 }
 
@@ -87,13 +91,13 @@ int AppService::main(const std::vector<std::string> &args) {
     }
 
     INFO("app service beggin ...");
-    INFO("arg: {0}, {1}, {2}", _conf._format, _conf._record_time, _conf._out_file);
+    INFO("arg: {0}, {1}, {2}", _conf._format, _conf._record_time,
+         _conf._out_file);
     VideoRecord record;
     record.initVideoEncoder();
     record.initFfmpeg(&_conf);
 
-    Poco::Thread thread;
-	thread.start(record);
-	thread.join();
+    Poco::ThreadPool::defaultPool().start(record);
+    Poco::ThreadPool::defaultPool().joinAll();
     return Application::EXIT_OK;
 }
