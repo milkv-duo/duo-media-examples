@@ -1,21 +1,10 @@
 #include "cvi_sdk.h"
 
-#include "log.h"
 #include <cstring>
 #include <stdio.h>
 
-int32_t find_pre_start_code(uint8_t *buf, int32_t bufLen) {
-    int32_t i = 0;
-    while (i < bufLen - 3) {
-        if (buf[i] == 0 && buf[i + 1] == 0 && buf[i + 2] == 0 &&
-            buf[i + 3] == 1) {
-            return i;
-            break;
-        }
-        i++;
-    }
-    return -1;
-}
+#include "log.h"
+#include "util.h"
 
 PIXEL_FORMAT_E vencMapPixelFormat(CVI_S32 pixel_format) {
     PIXEL_FORMAT_E enPixelFormat = PIXEL_FORMAT_YUV_PLANAR_420;
@@ -258,15 +247,6 @@ CVI_S32 CviVideoEncoder::_SAMPLE_COMM_VI_DefaultConfig(CVI_VOID) {
     SIZE_S stSize;
     CVI_S32 s32Ret = CVI_SUCCESS;
 
-    stIniCfg.enSource = VI_PIPE_FRAME_SOURCE_DEV;
-    stIniCfg.devNum = 1;
-    stIniCfg.enSnsType[0] = SONY_IMX327_MIPI_2M_30FPS_12BIT;
-    stIniCfg.enWDRMode[0] = WDR_MODE_NONE;
-    stIniCfg.s32BusId[0] = 3;
-    stIniCfg.s32SnsI2cAddr[0] = -1;
-    stIniCfg.MipiDev[0] = 0xFF;
-    stIniCfg.u8UseMultiSns = 0;
-
     // Get config from ini if found.
     if (SAMPLE_COMM_VI_ParseIni(&stIniCfg)) {
         SAMPLE_PRT("Parse complete\n");
@@ -282,6 +262,8 @@ CVI_S32 CviVideoEncoder::_SAMPLE_COMM_VI_DefaultConfig(CVI_VOID) {
     /************************************************
      * step2:  Get input size
      ************************************************/
+    // stIniCfg.enSnsType[0] = SONY_IMX327_MIPI_2M_30FPS_12BIT
+    //  enPicSize = PIC_1080P
     s32Ret = SAMPLE_COMM_VI_GetSizeBySensor(stIniCfg.enSnsType[0], &enPicSize);
     if (s32Ret != CVI_SUCCESS) {
         CVI_TRACE_LOG(CVI_DBG_ERR,
@@ -290,6 +272,8 @@ CVI_S32 CviVideoEncoder::_SAMPLE_COMM_VI_DefaultConfig(CVI_VOID) {
         return s32Ret;
     }
 
+    // stSize->u32Width  = 1920;
+    // stSize->u32Height = 1080;
     s32Ret = SAMPLE_COMM_SYS_GetPicSize(enPicSize, &stSize);
     if (s32Ret != CVI_SUCCESS) {
         CVI_TRACE_LOG(CVI_DBG_ERR,
@@ -316,15 +300,15 @@ CVI_S32 CviVideoEncoder::_SAMPLE_COMM_VI_DefaultConfig(CVI_VOID) {
     }
 
     memcpy(&m_stViConfig, &stViConfig, sizeof(SAMPLE_VI_CONFIG_S));
-    // memcpy(&g_stIniCfg, &stIniCfg, sizeof(SAMPLE_INI_CFG_S));
 
     return s32Ret;
 }
 
-void CviVideoEncoder::sys_vi_deinit() {
-    SAMPLE_COMM_VI_DestroyIsp(&m_stViConfig);
-
-    SAMPLE_COMM_VI_DestroyVi(&m_stViConfig);
+void CviVideoEncoder::exit_cviSdk() {
+    if (m_stViConfig.s32WorkingViNum != 0) {
+        SAMPLE_COMM_VI_DestroyIsp(&m_stViConfig);
+        SAMPLE_COMM_VI_DestroyVi(&m_stViConfig);
+    }
 
     SAMPLE_COMM_SYS_Exit();
 }
@@ -336,19 +320,34 @@ CviVideoEncoder::CviVideoEncoder() {
 
 CviVideoEncoder::~CviVideoEncoder() {
     venc_stop();
-    sys_vi_deinit();
+    exit_cviSdk();
 
     delete m_pCommonIc;
     delete m_pChnCtx;
 }
 
-int32_t CviVideoEncoder::init_cfg(const char *codeName, VideoInfo *pvideo) {
+int32_t CviVideoEncoder::init_cviSdk(const char *codeName, VideoInfo *pvideo) {
+
+    // check pvideo
+    if (pvideo->width == 0 || pvideo->height == 0) {
+        ERROR("There is an error in the pvideo data!");
+        return -1;
+    }
+
     // 设置 log 等级
     cviGetMask();
 
     chnInputCfg *pIc = &(m_pChnCtx->chnIc);
     initInputCfg(m_pCommonIc, pIc);
 
+    m_pCommonIc->ifInitVb = 0;
+    m_pCommonIc->bindmode = VENC_BIND_VI;
+    m_pCommonIc->numChn = 1;
+    m_pCommonIc->bThreadDisable = CVI_TRUE;
+    m_pCommonIc->u32ViWidth = pvideo->width;
+    m_pCommonIc->u32ViHeight = pvideo->height;
+
+    // codeName = "264" or "265"
     strncpy(pIc->codec, codeName, sizeof(codeName) - 1);
     pIc->codec[sizeof(codeName) - 1] = '\0';
     pIc->width = pvideo->width;
@@ -356,51 +355,25 @@ int32_t CviVideoEncoder::init_cfg(const char *codeName, VideoInfo *pvideo) {
     pIc->bsMode = BS_MODE_QUERY_STAT;
     pIc->framerate = pvideo->frame;
     pIc->bitrate = pvideo->rate;
-    pIc->pixel_format = 3; // Nv21
-    // pIc->rcMode = SAMPLE_RC_AVBR;
-
-    m_pCommonIc->bindmode = VENC_BIND_VI;
-    m_pCommonIc->numChn = 1;
-    m_pCommonIc->bThreadDisable = CVI_TRUE;
-    m_pCommonIc->u32ViWidth = pvideo->width;
-    m_pCommonIc->u32ViHeight = pvideo->height;
-
+    pIc->maxbitrate = pIc->bitrate * 2; // max: 1000000 kbits
+    pIc->pixel_format = 3;              // Nv21
+    pIc->rcMode = SAMPLE_RC_FIXQP;      // SAMPLE_RC_VBR
+    pIc->bind_mode = m_pCommonIc->bindmode;
 
     int ret = checkInputCfg(pIc);
     if (ret < 0) {
-        ERROR(" checkInputCfg failed! ret: {0}", ret);
+        ERROR("checkInputCfg failed! ret: {0}", ret);
         return -1;
     }
 
-    //m_duration = static_cast<int>(AV_TIME_BASE / pIc->framerate);
-
-    venc_initVi();
+    // setup VI
+    int32_t s32Ret = _SAMPLE_COMM_VI_DefaultConfig();
+    if (s32Ret != CVI_SUCCESS) {
+        ERROR("Could not start vi! ret = {0}", s32Ret);
+        return s32Ret;
+    }
 
     return 0;
-}
-
-int32_t CviVideoEncoder::venc_initVi() {
-    chnInputCfg *pIc = &(m_pChnCtx->chnIc);
-    commonInputCfg *pcic = m_pCommonIc;
-    CVI_S32 s32Ret = CVI_SUCCESS;
-
-    if (pcic->u32ViWidth == 0 || pcic->u32ViHeight == 0) {
-        return s32Ret;
-    }
-
-    pcic->ifInitVb = 0;
-
-    // setup VI
-    s32Ret = _SAMPLE_COMM_VI_DefaultConfig();
-    if (s32Ret != CVI_SUCCESS) {
-        ERROR("SAMPLE_COMM_VI_DefaultConfig failure! ret = {0}", s32Ret);
-        return s32Ret;
-    }
-    sleep(2);
-
-    pIc->bind_mode = pcic->bindmode;
-
-    return s32Ret;
 }
 
 int32_t CviVideoEncoder::venc_start() {
@@ -414,14 +387,6 @@ int32_t CviVideoEncoder::venc_start() {
         return CVI_FAILURE;
     }
 
-    if (m_pCommonIc->ifInitVb) {
-        s32Ret = initSysAndVb();
-        if (s32Ret != CVI_SUCCESS) {
-            ERROR("fail to init sys and vb, {0}", s32Ret);
-            return s32Ret;
-        }
-    }
-
     s32Ret = SAMPLE_COMM_VENC_SetModParam(m_pCommonIc);
     if (s32Ret != CVI_SUCCESS) {
         ERROR("SAMPLE_COMM_VENC_SetModParam failure!");
@@ -429,81 +394,12 @@ int32_t CviVideoEncoder::venc_start() {
     }
 
     s32Ret = _SAMPLE_VENC_INIT_CHANNEL();
-    if (s32Ret) {
+    if (s32Ret != CVI_SUCCESS) {
         ERROR("Chn 0 init_channel  failed! ret = {0}", s32Ret);
         return CVI_FAILURE;
     }
 
     return CVI_SUCCESS;
-}
-
-int32_t CviVideoEncoder::initSysAndVb() {
-    chnInputCfg *pIc = &(m_pChnCtx->chnIc);
-
-    CVI_S32 s32Ret = CVI_SUCCESS;
-    CVI_U32 u32BlkSize;
-    VB_CONFIG_S stVbConf;
-
-    memset(&stVbConf, 0, sizeof(VB_CONFIG_S));
-
-    stVbConf.u32MaxPoolCnt = 0;
-
-    SIZE_S stSize;
-    PIXEL_FORMAT_E enPixelFormat;
-    CVI_BOOL bRepeated = CVI_FALSE;
-
-    enPixelFormat = vencMapPixelFormat(pIc->pixel_format);
-
-    if (pIc->inWidth || pIc->inHeight) {
-        stSize.u32Width = pIc->inWidth;
-        stSize.u32Height = pIc->inHeight;
-    } else {
-        stSize.u32Width = pIc->width;
-        stSize.u32Height = pIc->height;
-    }
-    u32BlkSize =
-        VENC_GetPicBufferSize(stSize.u32Width, stSize.u32Height, enPixelFormat,
-                              DATA_BITWIDTH_8, COMPRESS_MODE_NONE);
-#ifdef ARCH_CV183X
-    INFO("arch183x u32BlkSize[{0}] align[{1}]", u32BlkSize, VENC_ALIGN_W);
-#else
-    u32BlkSize += 0x1000 * 3;
-    INFO("arch182x u32BlkSize[{0}] align[{1}]", u32BlkSize, VENC_ALIGN_W);
-#endif
-
-    for (CVI_U32 j = 0; j < stVbConf.u32MaxPoolCnt; j++) {
-        if (u32BlkSize == stVbConf.astCommPool[j].u32BlkSize) {
-            stVbConf.astCommPool[j].u32BlkCnt++;
-            bRepeated = CVI_TRUE;
-            break;
-        }
-    }
-
-    if (bRepeated == CVI_FALSE) {
-        stVbConf.astCommPool[stVbConf.u32MaxPoolCnt].u32BlkSize = u32BlkSize;
-        stVbConf.astCommPool[stVbConf.u32MaxPoolCnt].u32BlkCnt = 1;
-        stVbConf.u32MaxPoolCnt++;
-    }
-
-    if (stVbConf.u32MaxPoolCnt > VB_MAX_COMM_POOLS) {
-        ERROR("u32MaxPoolCnt {0} > VB_MAX_COMM_POOLS {1}",
-              stVbConf.u32MaxPoolCnt, VB_MAX_COMM_POOLS);
-        return CVI_FAILURE;
-    }
-
-    for (CVI_U32 j = 0; j < stVbConf.u32MaxPoolCnt; j++) {
-        INFO("[Pool {0}] u32BlkSize: {1}, u32BlkCnt: {2}", j,
-             stVbConf.astCommPool[j].u32BlkSize,
-             stVbConf.astCommPool[j].u32BlkCnt);
-    }
-
-    s32Ret = SAMPLE_COMM_SYS_Init(&stVbConf);
-    if (s32Ret != CVI_SUCCESS) {
-        ERROR("SAMPLE_COMM_SYS_Init failed! ret: {0}", s32Ret);
-        return s32Ret;
-    }
-
-    return s32Ret;
 }
 
 int32_t CviVideoEncoder::_SAMPLE_VENC_INIT_CHANNEL() {
@@ -517,7 +413,7 @@ int32_t CviVideoEncoder::_SAMPLE_VENC_INIT_CHANNEL() {
     m_pChnCtx->s32FbCnt = 1;
 
     // 10000
-    m_pChnCtx->chnIc.getstream_timeout = -1;
+    pIc->getstream_timeout = -1;
 
     if (!strcmp(pIc->codec, "265"))
         m_pChnCtx->enPayLoad = PT_H265;
@@ -585,28 +481,11 @@ int32_t CviVideoEncoder::_SAMPLE_VENC_INIT_CHANNEL() {
         return CVI_FAILURE;
     }
 
-    /*
-    if (m_pCommonIc->ifInitVb) {
-        m_pChnCtx->pstFrameInfo =
-            allocate_frame(inFrmSize, pvecc->enPixelFormat);
-        INFO("pstFrameInfo = {0}\n", m_pChnCtx->pstFrameInfo);
-
-        if (!m_pChnCtx->pstFrameInfo) {
-            CVI_VENC_ERR("allocate_frame\n");
-            return CVI_FAILURE;
-        }
-
-        m_pChnCtx->pstVFrame = &m_pChnCtx->pstFrameInfo->stVFrame;
-    }
-    */
-
     return CVI_SUCCESS;
 }
 
 int32_t CviVideoEncoder::venc_stop() {
-    commonInputCfg *pcic = m_pCommonIc;
     chnInputCfg *pIc = &(m_pChnCtx->chnIc);
-    vencChnCtx *pvecc = m_pChnCtx;
 
     if (strcmp(pIc->codec, "264") && strcmp(pIc->codec, "265")) {
         ERROR("codec = {0}", pIc->codec);
@@ -617,13 +496,10 @@ int32_t CviVideoEncoder::venc_stop() {
 
     SAMPLE_COMM_VENC_Stop(m_chnNum);
 
-    if (pcic->ifInitVb && pvecc->pstFrameInfo != nullptr) {
-        free_frame(pvecc->pstFrameInfo);
-    }
-
-    if (pvecc->pu8QpMap) {
-        free(pvecc->pu8QpMap);
-        pvecc->pu8QpMap = NULL;
+    // 265
+    if (m_pChnCtx->pu8QpMap) {
+        free(m_pChnCtx->pu8QpMap);
+        m_pChnCtx->pu8QpMap = NULL;
     }
 
     return 0;
@@ -700,7 +576,7 @@ int32_t CviVideoEncoder::getStream(EncoderCallback *pCallback) {
     return s32Ret;
 }
 
-CVI_S32 CviVideoEncoder::getStreamInternal(PAYLOAD_TYPE_E enType,
+int32_t CviVideoEncoder::getStreamInternal(PAYLOAD_TYPE_E enType,
                                            VENC_STREAM_S *pstStream,
                                            EncoderCallback *pCallback) {
     VENC_PACK_S *ppack;
@@ -713,7 +589,6 @@ CVI_S32 CviVideoEncoder::getStreamInternal(PAYLOAD_TYPE_E enType,
     int32_t startCodePos = 0;
 
     for (CVI_U32 i = 0; i < pstStream->u32PackCount; i++) {
-        AVPacket *pkt = av_packet_alloc();
 
         ppack = &pstStream->pstPack[i];
         src_nb = ppack->u32Len - ppack->u32Offset;
@@ -725,7 +600,8 @@ CVI_S32 CviVideoEncoder::getStreamInternal(PAYLOAD_TYPE_E enType,
         }
 
         payload = src_payload + startCodePos;
-        nb = src_nb - (startCodePos);
+        nb = src_nb - startCodePos;
+        AVPacket *pkt = av_packet_alloc();
 
         if (ppack->DataType.enH264EType == H264E_NALU_SPS) {
             // TODO
@@ -748,7 +624,7 @@ CVI_S32 CviVideoEncoder::getStreamInternal(PAYLOAD_TYPE_E enType,
         pkt->data = payload;
         pkt->size = nb;
         pkt->pts = ppack->u64PTS; // 设置时间戳（按需调整）
-        pkt->dts = pkt->pts;             // 设置解码时间戳（按需调整）
+        pkt->dts = pkt->pts;      // 设置解码时间戳（按需调整）
 
         pCallback->onVideoData(pkt);
         av_packet_free(&pkt);
@@ -762,8 +638,7 @@ int32_t CviVideoEncoder::sendkeyframe() {
     return s32Ret;
 }
 
-CVI_S32 CviVideoEncoder::_SAMPLE_VENC_SetChnParam(uint32_t chgBitrate,
-                                                  int chgFramerate) {
+int32_t CviVideoEncoder::setChnParam(uint32_t chgBitrate, int chgFramerate) {
     CVI_S32 s32Ret = CVI_SUCCESS;
     VENC_CHN VencChn = m_pChnCtx->VencChn;
     chnInputCfg *pIc = &m_pChnCtx->chnIc;

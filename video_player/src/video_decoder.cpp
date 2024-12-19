@@ -98,7 +98,7 @@ int VideoDecoder::decode_packet(AVCodecContext *dec, const AVPacket *pkt) {
     if (ret < 0) {
         char errbuf[128];
         av_strerror(ret, errbuf, sizeof(errbuf));
-        ERROR("Error submitting a packet for decoding {0}", errbuf);
+        ERROR("Error submitting a packet for decoding: {0}", errbuf);
         return ret;
     }
 
@@ -136,8 +136,10 @@ void VideoDecoder::run() {
         else if (pkt->stream_index == _audio_stream_idx)
             ret = decode_packet(_audio_dec_ctx, pkt);
         av_packet_unref(pkt);
+        /*
         if (ret < 0)
             break;
+        */
     }
 
     if (_video_dec_ctx)

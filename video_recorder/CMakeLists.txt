@@ -24,8 +24,10 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
 
 set(MIDDLEWARE_PATH "${DUO_BUILDROOT_SDK}/middleware/v2")
-set(3RD_PARTY "${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party")
+set(TOP_PROJECT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/..")
+set(3RD_PARTY "${TOP_PROJECT_PATH}/3rd_party")
 set(SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 
 
 #添加duo-buildroot-sdk/middleware/v2 头文件
@@ -40,11 +42,16 @@ include_directories("${3RD_PARTY}/include/ffmpeg")
 #添加ffmpeg 头文件
 include_directories("${FFMPEG_PATH}/include")
 
+# utls 头文件
+include_directories("${TOP_PROJECT_PATH}/utils")
+
 # src库头文件
-include_directories(${SRC_PATH})
+include_directories("${SRC_PATH}")
+
+add_subdirectory("${TOP_PROJECT_PATH}/utils" build)
 
 #源文件
-file(GLOB_RECURSE SOURCES "${SRC_PATH}/*.cpp" "${SRC_PATH}/*.h")
+file(GLOB_RECURSE SOURCES "${SRC_PATH}/*.cpp")
 add_executable(${projectname} main.cpp ${SOURCES})
 
 #添加duo-buildroot-sdk/middleware/v2 库
@@ -61,8 +68,10 @@ target_link_libraries(${projectname} PUBLIC PocoNet PocoFoundation PocoUtil Poco
 
 #添加ffmpeg第三方库
 target_link_directories(${projectname} PUBLIC "${3RD_PARTY}/lib/ffmpeg")
-target_link_libraries(${projectname} PUBLIC avformat avcodec swresample avutil)
+target_link_libraries(${projectname} PUBLIC avformat avcodec swresample avutil z)
 
-target_link_libraries(${projectname} PUBLIC z)
+target_link_libraries(${projectname} PUBLIC 
+        utils
+)
 
 install(TARGETS ${projectname} RUNTIME DESTINATION out)

@@ -26,7 +26,7 @@ void AppService::defineOptions(Poco::Util::OptionSet &options) {
 
     options.addOption(
         Poco::Util::Option("format", "f",
-                           "Specify output format: flv and so on.")
+                           "Specify output format: h264, flv, mp4.")
             .required(true)
             .repeatable(false)
             .argument("<format>")

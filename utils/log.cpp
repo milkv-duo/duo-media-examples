@@ -17,25 +17,7 @@ void init_spdlog() {
             std::string name(msg.logger_name.data(), 0, msg.logger_name.size());
             // 日志消息
             std::string str(msg.payload.data(), 0, msg.payload.size());
-            // 日志时间
-            std::time_t now_c = std::chrono::system_clock::to_time_t(msg.time);
 
-            // 回调的处理逻辑自己根据项目情况定义，比如实时显示到UI、保存到数据库等等
-
-            //.... 回调处理逻辑的示例
-            // std::tm localTime;
-            // localtime_s(&localTime, &now_c);
-            // char timeStr[50];
-            // std::strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S",
-            // &localTime);
-            //// 获取毫秒数
-            // auto duration = msg.time.time_since_epoch();
-            // auto milliseconds =
-            // std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()
-            // % 1000; std::cout << timeStr << "." << std::setfill('0') <<
-            // std::setw(3) << milliseconds << " " ; std::cout <<
-            // to_string_view(msg.level).data() << " " << str << std::endl <<
-            // std::endl << std::flush;
         });
     callback_sink->set_level(spdlog::level::info);
 

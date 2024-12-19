@@ -17,7 +17,7 @@ int32_t VideoRecord::initVideoEncoder() {
     if (_encoder == NULL) {
         _encoder = new CviVideoEncoder();
         struct VideoInfo videoInfo;
-        int32_t ret = _encoder->init_cfg("264", &videoInfo);
+        int32_t ret = _encoder->init_cviSdk("264", &videoInfo);
 
         if (ret != 0) {
             ERROR("init_cfg failed! ret = {0}", ret);
