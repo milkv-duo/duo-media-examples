@@ -83,7 +83,7 @@
 
    采用 CVITEK 提供的Multimedia Framework 解码和播放视频。
    <br>
-    注意：播放视频前要调试![MIPI DSI接口屏幕](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi)
+    注意：播放视频前要调试 [MIPI DSI接口屏幕](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi)
 
 3. video_player_fb
 

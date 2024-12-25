@@ -78,15 +78,15 @@ This project provides examples of multimedia applications developed in C/C++ for
 2. video_player_vo 
    - Uses CVITEK's Multimedia Framework for video decoding and playback. 
    <br>
-   Note: Before playing videos, configure ![MIPI DSI interface screen](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi). 
+   Note: Before playing videos, configure [MIPI DSI interface screen](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi). 
 
 3. video_player_fb 
    - Uses ffmpeg for video decoding and Linux framebuffer for playback. 
    <br>
    Note: Before playing videos, load the fb kernel module: 
-   ```bash 
-   [root@milkv-duo]~# insmod /mnt/system/ko/cvi_fb.ko 
-   ``` 
+    ```bash 
+    [root@milkv-duo]~# insmod /mnt/system/ko/cvi_fb.ko 
+    ``` 
    
 ## About Milk-V 
    - Visit the [official website](https://milkv.io/) for more information. 
