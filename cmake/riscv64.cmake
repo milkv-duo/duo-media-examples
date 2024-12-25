@@ -4,9 +4,9 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR riscv64)
 
-# Fixme
-set(DUO_BUILDROOT_SDK "/home/lihai/li/work/duo-buildroot-sdk")
-set(CROSS_CHAIN_PATH  "/home/lihai/li/work/host-tools")
+# Fixme replace with your appropriate path.
+set(DUO_BUILDROOT_SDK "XXX/duo-buildroot-sdk")
+set(CROSS_CHAIN_PATH  "XXX/host-tools")
 
 # 设置交叉编译工具链路径
 set(CMAKE_C_COMPILER ${CROSS_CHAIN_PATH}/gcc/riscv64-linux-musl-x86_64/bin/riscv64-unknown-linux-musl-gcc)
