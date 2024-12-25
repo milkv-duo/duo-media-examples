@@ -62,7 +62,7 @@ int AppService::main(const std::vector<std::string> &args) {
         return Application::EXIT_OK;
     }
 
-    INFO("app service beggin ...");
+    INFO("vidoe player beggin ...");
     INFO("arg: {0}", _input_file);
 
     MediaPlayer player;

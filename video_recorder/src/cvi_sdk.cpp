@@ -356,7 +356,7 @@ int32_t CviVideoEncoder::init_cviSdk(const char *codeName, VideoInfo *pvideo) {
     pIc->framerate = pvideo->frame;
     pIc->bitrate = pvideo->rate;
     pIc->maxbitrate = pIc->bitrate * 2; // max: 1000000 kbits
-    pIc->pixel_format = 3;              // Nv21
+    pIc->pixel_format = 0;              // 0: 420P, 3 is Nv21
     pIc->rcMode = SAMPLE_RC_FIXQP;      // SAMPLE_RC_VBR
     pIc->bind_mode = m_pCommonIc->bindmode;
 

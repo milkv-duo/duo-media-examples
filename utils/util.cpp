@@ -11,3 +11,9 @@ int32_t find_pre_start_code(uint8_t *buf, int32_t bufLen) {
     }
     return -1;
 }
+
+std::string intToHex(int value) {
+    std::stringstream ss;
+    ss << std::hex << std::uppercase << value; // 使用 hex 格式并转为大写
+    return ss.str();
+}

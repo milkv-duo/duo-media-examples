@@ -2,6 +2,7 @@
 
 extern "C" {
 #include "libavformat/avformat.h"
+#include "libavutil/error.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/opt.h"
 }
@@ -11,7 +12,6 @@ extern "C" {
 
 #include "Poco/Runnable.h"
 #include "Poco/Thread.h"
-#include "Poco/Timer.h"
 
 struct RecordConf {
     std::string _format = "flv";
@@ -27,21 +27,20 @@ class VideoRecord : public Poco::Runnable, public EncoderCallback {
     int32_t initVideoEncoder();
     int32_t initFfmpeg(RecordConf *pConf);
     void stop() { _running = false; }
+    int add_video_stream();
 
-    //Poco::Runnable
-    //Do whatever the thread needs to do.
+    // Poco::Runnable
+    // Do whatever the thread needs to do.
     void run();
 
-    //EncoderCallback
+    // EncoderCallback
     void onVideoData(AVPacket *pkt) override;
 
   private:
-    void onTimer(Poco::Timer &timer);
-
-  private:
     bool _running = true;
+    int64_t _record_time; // us
+    VideoInfo _videoInfo;
 
-    Poco::Timer _timer;
     CviVideoEncoder *_encoder = nullptr;
     AVFormatContext *_fmt_ctx = nullptr;
     AVOutputFormat *_out_fmt = nullptr;

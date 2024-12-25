@@ -26,7 +26,7 @@ void AppService::defineOptions(Poco::Util::OptionSet &options) {
 
     options.addOption(
         Poco::Util::Option("format", "f",
-                           "Specify output format: h264, flv, mp4.")
+                           "Specify output format: h264, flv.")
             .required(true)
             .repeatable(false)
             .argument("<format>")
@@ -90,7 +90,7 @@ int AppService::main(const std::vector<std::string> &args) {
         return Application::EXIT_OK;
     }
 
-    INFO("app service beggin ...");
+    INFO("record beggin ...");
     INFO("arg: {0}, {1}, {2}", _conf._format, _conf._record_time,
          _conf._out_file);
     VideoRecord record;
