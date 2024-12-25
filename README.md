@@ -76,18 +76,14 @@ This project provides examples of multimedia applications developed in C/C++ for
    - Record a video from the camera. 
 
 2. video_player_vo 
-   - Uses CVITEK's Multimedia Framework for video decoding and playback. 
-   <br>
-   Note: Before playing videos, configure [MIPI_DSI](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi). 
-
+   - Uses CVITEK's Multimedia Framework for video decoding and playback.
+   - Note: Before playing videos, configure [MIPI_DSI](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi)
 3. video_player_fb 
-   - Uses ffmpeg for video decoding and Linux framebuffer for playback. 
-   <br>
-   Note: Before playing videos, load the fb kernel module: 
-   <br>
-   ```bash
+   - Uses ffmpeg for video decoding and Linux framebuffer for playback.
+   - Note: Before playing videos, load the fb kernel module:
+```bash
    [root@milkv-duo]~# insmod /mnt/system/ko/cvi_fb.ko 
-   ``` 
+``` 
    
 ## About Milk-V 
    - Visit the [official website](https://milkv.io/) for more information. 
