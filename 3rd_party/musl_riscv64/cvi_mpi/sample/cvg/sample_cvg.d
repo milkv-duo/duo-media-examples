@@ -1,0 +1,19 @@
+/home/lihai/li/work/duo-buildroot-sdk/middleware/v2/sample/cvg/sample_cvg.o: \
+ /home/lihai/li/work/duo-buildroot-sdk/middleware/v2/sample/cvg/sample_cvg.c \
+ /home/lihai/li/work/duo-buildroot-sdk/middleware/v2/sample/cvg/sample_cvg.h \
+ /home/lihai/li/work/duo-buildroot-sdk/middleware/v2/include/linux/f_cvg.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm/types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm-generic/types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm-generic/int-ll64.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm/bitsperlong.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm-generic/bitsperlong.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/posix_types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/stddef.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm/posix_types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm-generic/posix_types.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/ion.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/ioctl.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm/ioctl.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/asm-generic/ioctl.h \
+ /home/lihai/li/work/duo-buildroot-sdk/linux_5.10/build/cv1813h_milkv_duos_sd/riscv/usr/include/linux/dma-buf.h
