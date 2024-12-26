@@ -11,6 +11,6 @@ fi
 
 
 cd $BuildDir
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../cmake/riscv64.cmake ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../cmake/musl_riscv64.cmake ..
 make -j16
 make install

@@ -22,56 +22,49 @@ endif()
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
-
-set(MIDDLEWARE_PATH "${DUO_BUILDROOT_SDK}/middleware/v2")
-set(TOP_PROJECT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/..")
-set(3RD_PARTY "${TOP_PROJECT_PATH}/3rd_party")
+set(CVI_MPI_PATH "${ARCH_PARTY}/cvi_mpi")
+set(USER_PATH "${ARCH_PARTY}/user")
+message(${USER_PATH})
 set(SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+#add cvi_mpi header directory
+include_directories("${CVI_MPI_PATH}/include")
+include_directories("${CVI_MPI_PATH}/include/isp/cv181x")
+include_directories("${CVI_MPI_PATH}/sample/common")
 
+#add user  header directory
+include_directories("${USER_PATH}/include")
+include_directories("${USER_PATH}/include/ffmpeg")
 
-#添加duo-buildroot-sdk/middleware/v2 头文件
-include_directories("${MIDDLEWARE_PATH}/include")
-include_directories("${MIDDLEWARE_PATH}/include/isp/cv181x")
-include_directories("${MIDDLEWARE_PATH}/sample/common")
+#add common_utils header directory
+include_directories("${TOP_PROJECT_PATH}/common_utils")
 
-#添加3rd_party 头文件
-include_directories("${3RD_PARTY}/include")
-include_directories("${3RD_PARTY}/include/ffmpeg")
-
-#添加ffmpeg 头文件
-include_directories("${FFMPEG_PATH}/include")
-
-# utls 头文件
-include_directories("${TOP_PROJECT_PATH}/utils")
-
-# src库头文件
+# src header directory 
 include_directories("${SRC_PATH}")
 
-add_subdirectory("${TOP_PROJECT_PATH}/utils" build)
+add_subdirectory("${TOP_PROJECT_PATH}/common_utils" build)
 
-#源文件
 file(GLOB_RECURSE SOURCES "${SRC_PATH}/*.cpp")
 add_executable(${projectname} main.cpp ${SOURCES})
 
-#添加duo-buildroot-sdk/middleware/v2 库
-target_link_directories(${projectname} PUBLIC "${MIDDLEWARE_PATH}/lib")
+#add cvi_mpi lib
+target_link_directories(${projectname} PUBLIC "${CVI_MPI_PATH}/lib")
 target_link_libraries(${projectname} PUBLIC cvi_ive ini sns_full sample isp vdec venc awb ae af cvi_bin cvi_bin_isp misc isp_algo sys vpu)
-target_link_directories(${projectname} PUBLIC "${MIDDLEWARE_PATH}/lib/3rd")
+target_link_directories(${projectname} PUBLIC "${CVI_MPI_PATH}/lib/3rd")
 target_link_libraries(${projectname} PUBLIC ini)
 
-#添加3rd_party第三方库
-target_link_directories(${projectname} PUBLIC "${3RD_PARTY}/lib")
+#add user lib
+target_link_directories(${projectname} PUBLIC "${USER_PATH}/lib")
 target_link_libraries(${projectname} PUBLIC spdlog)
-target_link_directories(${projectname} PUBLIC "${3RD_PARTY}/lib/Poco")
+target_link_directories(${projectname} PUBLIC "${USER_PATH}/lib/Poco")
 target_link_libraries(${projectname} PUBLIC PocoNet PocoFoundation PocoUtil PocoJSON PocoXML)
 
 #添加ffmpeg第三方库
-target_link_directories(${projectname} PUBLIC "${3RD_PARTY}/lib/ffmpeg")
+target_link_directories(${projectname} PUBLIC "${USER_PATH}/lib/ffmpeg")
 target_link_libraries(${projectname} PUBLIC avformat avcodec swresample swscale avutil z)
 
 target_link_libraries(${projectname} PUBLIC 
-        utils
+        common_utils
 )
 
 install(TARGETS ${projectname} RUNTIME DESTINATION out)

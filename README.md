@@ -12,34 +12,27 @@ This project provides examples of multimedia applications developed in C/C++ for
    ```bash
    sudo apt-get install wget git cmake
    ```
-
 3. Download the cross-compilation tools:
    ```bash
    git clone https://github.com/milkv-duo/host-tools.git
    ```
 
-4. Download the Milk-V duo sdk package:
-   ```bash
-   git clone https://github.com/milkv-duo/duo-buildroot-sdk.git
-   ```
-
-5. Obtain the Examples:
+4. Obtain the Examples:
    ```bash
    git clone https://github.com/milkv-duo/duo-media-examples.git
    ```
 
-6. Modify the `cmake/riscv64.cmake` file to set `DUO_BUILDROOT_SDK` and `CROSS_CHAIN_PATH`:
-   ```cmake
-   # Replace with your appropriate path.
-   set(DUO_BUILDROOT_SDK "XXX/duo-buildroot-sdk")
-   set(CROSS_CHAIN_PATH  "XXX/host-tools")
-   ```
+5. Modify the `cmake/musl_riscv64.cmake` file to set `CROSS_CHAIN_PATH`:
+    ```
+    # Fixme replace with your appropriate path.
+    set(CROSS_CHAIN_PATH  "XXX/host-tools/gcc/riscv64-linux-musl-x86_64")
+    ```
 
-7. Compile and test:
-   As an example, for the `video_recorder`, navigate to the example directory and run `./build.sh`:
+6. Compile and test:
+   As an example, for the `video_recorder`, navigate to the example directory and run `./build_riscv64.sh`:  
    ```bash
    cd video_recorder
-   ./build.sh
+   ./build_riscv64.sh
    ``` 
    After the compilation is successful, send the `out/videoRecorder` executable program to the Duo device through the network or USB-NCM. For example, in the case of USB-NCM which is supported by the default firmware, if the IP of Duo is 192.168.42.1, the username is `root` and the password is `milkv`.
    ```bash
@@ -77,17 +70,25 @@ This project provides examples of multimedia applications developed in C/C++ for
 
 2. video_player_vo 
    - Uses CVITEK's Multimedia Framework for video decoding and playback. 
-   <br>
+   <br>  
    Note: Before playing videos, configure [MIPI_DSI](https://milkv.io/zh/docs/duo/low-level-dev/mipi-dsi). 
 
 3. video_player_fb 
    - Uses ffmpeg for video decoding and Linux framebuffer for playback. 
    <br>
    Note: Before playing videos, load the fb kernel module: 
-   <br>
+   <br>  
    ```bash
    [root@milkv-duo]~# insmod /mnt/system/ko/cvi_fb.ko 
    ``` 
+
+## Questions
+
+### Source of 3rd_party
+   - [cvi_mpi](https://github.com/sophgo/cvi_mpi)
+   - [poco](https://github.com/pocoproject/poco)
+   - [ffmpeg](https://github.com/FFmpeg/FFmpeg)
+   - [spdlog](https://github.com/gabime/spdlog)
    
 ## About Milk-V 
    - Visit the [official website](https://milkv.io/) for more information. 

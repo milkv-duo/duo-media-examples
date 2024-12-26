@@ -45,7 +45,8 @@ int VideoDecoder::open_file(std::string input_file) {
 }
 
 int VideoDecoder::open_codec_context(int *stream_idx, AVCodecContext **dec_ctx,
-                       AVFormatContext *fmt_ctx, enum AVMediaType type) {
+                                     AVFormatContext *fmt_ctx,
+                                     enum AVMediaType type) {
     int ret, stream_index;
     AVStream *st;
     AVCodec *dec = NULL;
@@ -89,7 +90,6 @@ int VideoDecoder::open_codec_context(int *stream_idx, AVCodecContext **dec_ctx,
     return 0;
 }
 
-
 int VideoDecoder::decode_packet(AVCodecContext *dec, const AVPacket *pkt) {
     int ret = 0;
     AVFrame *frame = av_frame_alloc();
@@ -128,18 +128,13 @@ int VideoDecoder::decode_packet(AVCodecContext *dec, const AVPacket *pkt) {
 }
 
 void VideoDecoder::run() {
-    int ret = 0;
     AVPacket *pkt = av_packet_alloc();
     while (av_read_frame(_fmt_ctx, pkt) >= 0) {
         if (pkt->stream_index == _video_stream_idx)
-            ret = decode_packet(_video_dec_ctx, pkt);
+            decode_packet(_video_dec_ctx, pkt);
         else if (pkt->stream_index == _audio_stream_idx)
-            ret = decode_packet(_audio_dec_ctx, pkt);
+            decode_packet(_audio_dec_ctx, pkt);
         av_packet_unref(pkt);
-        /*
-        if (ret < 0)
-            break;
-        */
     }
 
     if (_video_dec_ctx)

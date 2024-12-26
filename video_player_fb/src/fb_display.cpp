@@ -76,7 +76,6 @@ int FBDisplay::open_device(std::string device) {
 }
 int FBDisplay::show_image(AVFrame *frame) {
     AVPixelFormat pix_fmt = (AVPixelFormat)frame->format;
-    const char *pix_fmt_name = av_get_pix_fmt_name(pix_fmt);
 
     if (_sws_ctx == NULL) {
         _sws_ctx =
@@ -90,8 +89,8 @@ int FBDisplay::show_image(AVFrame *frame) {
     rgbFrame->height = _height;
     av_frame_get_buffer(rgbFrame, 0);
 
-    int ret = sws_scale(_sws_ctx, frame->data, frame->linesize, 0,
-                        frame->height, rgbFrame->data, rgbFrame->linesize);
+    sws_scale(_sws_ctx, frame->data, frame->linesize, 0, frame->height,
+              rgbFrame->data, rgbFrame->linesize);
 
     memcpy(_fbMMap, rgbFrame->data[0], _screensize);
     av_frame_free(&rgbFrame);
