@@ -8,7 +8,7 @@ set(TOP_PROJECT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(ARCH_PARTY "${TOP_PROJECT_PATH}/3rd_party/musl_riscv64")
 
 # Fixme replace with your appropriate path.
-set(CROSS_CHAIN_PATH  "/home/lihai/li/work/host-tools/gcc/riscv64-linux-musl-x86_64")
+set(CROSS_CHAIN_PATH  "XXX/host-tools/gcc/riscv64-linux-musl-x86_64")
 
 # 设置交叉编译工具链路径
 set(CMAKE_CXX_COMPILER ${CROSS_CHAIN_PATH}/bin/riscv64-unknown-linux-musl-g++)
